@@ -1,0 +1,33 @@
+@page
+@model AdminStudentsModel
+@{
+    ViewData["Title"] = "Studenci";
+}
+<h2>Studenci</h2>
+<a asp-page="/Admin/AddStudent">Dodaj studenta</a>
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th>Email</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var student in Model.Students)
+    {
+        <tr>
+            <td>@student.Id</td>
+            <td>@student.FirstName</td>
+            <td>@student.LastName</td>
+            <td>@student.Email</td>
+            <td>
+                <a asp-page="/Admin/EditStudent" asp-route-id="@student.Id">Edytuj</a> |
+                <a asp-page="/Admin/DeleteStudent" asp-route-id="@student.Id">Usuń</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table> 
