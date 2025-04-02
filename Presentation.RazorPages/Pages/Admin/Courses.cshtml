@@ -1,0 +1,31 @@
+@page
+@model AdminCoursesModel
+@{
+    ViewData["Title"] = "Kursy";
+}
+<h2>Kursy</h2>
+<a asp-page="/Admin/AddCourse">Dodaj kurs</a>
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nazwa</th>
+            <th>Opis</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var course in Model.Courses)
+    {
+        <tr>
+            <td>@course.Id</td>
+            <td>@course.Name</td>
+            <td>@course.Description</td>
+            <td>
+                <a asp-page="/Admin/EditCourse" asp-route-id="@course.Id">Edytuj</a> |
+                <a asp-page="/Admin/DeleteCourse" asp-route-id="@course.Id">Usuń</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table> 
