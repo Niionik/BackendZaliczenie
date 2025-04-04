@@ -1,0 +1,30 @@
+@page
+@model AdminEnrollmentsModel
+@{
+    ViewData["Title"] = "Zapisy";
+}
+<h2>Zapisy</h2>
+<a asp-page="/Admin/AddEnrollment">Dodaj zapis</a>
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Student</th>
+            <th>Kurs</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var enrollment in Model.Enrollments)
+    {
+        <tr>
+            <td>@enrollment.Id</td>
+            <td>@enrollment.Student?.FirstName @enrollment.Student?.LastName</td>
+            <td>@enrollment.Course?.Name</td>
+            <td>
+                <a asp-page="/Admin/DeleteEnrollment" asp-route-id="@enrollment.Id">Usuń</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table> 
