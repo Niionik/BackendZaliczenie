@@ -1,0 +1,18 @@
+@page "{id:int}"
+@model EditCourseModel
+@{
+    ViewData["Title"] = "Edytuj kurs";
+}
+<h2>Edytuj kurs</h2>
+<form method="post">
+    <div>
+        <label>Nazwa:</label>
+        <input asp-for="Name" />
+    </div>
+    <div>
+        <label>Opis:</label>
+        <input asp-for="Description" />
+    </div>
+    <button type="submit">Zapisz zmiany</button>
+</form>
+<a asp-page="/Admin/Courses">Powrót do listy</a> 

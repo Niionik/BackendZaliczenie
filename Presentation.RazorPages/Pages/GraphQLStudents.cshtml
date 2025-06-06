@@ -1,0 +1,18 @@
+@page
+@model GraphQLStudentsModel
+@{
+    ViewData["Title"] = "Studenci (GraphQL)";
+}
+<h2>Studenci (GraphQL)</h2>
+<form method="post">
+    <button type="submit">Pobierz studentów przez GraphQL</button>
+</form>
+@if (Model.Students != null)
+{
+    <ul>
+    @foreach (var s in Model.Students)
+    {
+        <li>@s.FirstName @s.LastName (@s.Email)</li>
+    }
+    </ul>
+} 

@@ -1,0 +1,11 @@
+@page "{id:int}"
+@model DeleteStudentModel
+@{
+    ViewData["Title"] = "Usuń studenta";
+}
+<h2>Usuń studenta</h2>
+<p>Czy na pewno chcesz usunąć studenta: <strong>@Model.FirstName @Model.LastName</strong>?</p>
+<form method="post">
+    <button type="submit">Usuń</button>
+    <a asp-page="/Admin/Students">Anuluj</a>
+</form> 

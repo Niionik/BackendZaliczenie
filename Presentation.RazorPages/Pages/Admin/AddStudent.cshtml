@@ -1,0 +1,22 @@
+@page
+@model AddStudentModel
+@{
+    ViewData["Title"] = "Dodaj studenta";
+}
+<h2>Dodaj studenta</h2>
+<form method="post">
+    <div>
+        <label>Imię:</label>
+        <input asp-for="FirstName" />
+    </div>
+    <div>
+        <label>Nazwisko:</label>
+        <input asp-for="LastName" />
+    </div>
+    <div>
+        <label>Email:</label>
+        <input asp-for="Email" />
+    </div>
+    <button type="submit">Dodaj</button>
+</form>
+<a asp-page="/Admin/Students">Powrót do listy</a> 
