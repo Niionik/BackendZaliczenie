@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Zarządzanie Kursami</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/index.html">System Zarządzania</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/students.html">Studenci</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/courses.html">Kursy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/enrollments.html">Zapisy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Zarządzanie Kursami</h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                    Dodaj Kurs
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nazwa</th>
+                                <th>Opis</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal dodawania kursu -->
+    <div class="modal fade" id="addCourseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Dodaj Kurs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCourseForm">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nazwa</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Opis</label>
+                            <textarea class="form-control" id="description" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCourse()">Zapisz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal edycji kursu -->
+    <div class="modal fade" id="editCourseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edytuj Kurs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCourseForm">
+                        <input type="hidden" id="editCourseId">
+                        <div class="mb-3">
+                            <label for="editName" class="form-label">Nazwa</label>
+                            <input type="text" class="form-control" id="editName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDescription" class="form-label">Opis</label>
+                            <textarea class="form-control" id="editDescription" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary" onclick="updateCourse()">Zapisz zmiany</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Funkcje pomocnicze
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        function showError(message) {
+            alert('Błąd: ' + message);
+        }
+
+        // Ładowanie kursów
+        async function loadCourses() {
+            try {
+                const response = await fetch('/api/courses', {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Błąd podczas pobierania kursów');
+                
+                const courses = await response.json();
+                const tbody = document.getElementById('coursesTableBody');
+                tbody.innerHTML = '';
+                
+                courses.forEach(course => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${course.id}</td>
+                            <td>${course.name}</td>
+                            <td>${course.description}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="editCourse(${course.id})">Edytuj</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCourse(${course.id})">Usuń</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Dodawanie kursu
+        async function saveCourse() {
+            const course = {
+                name: document.getElementById('name').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                const response = await fetch('/api/courses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(course)
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas dodawania kursu');
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addCourseModal'));
+                modal.hide();
+                document.getElementById('addCourseForm').reset();
+                loadCourses();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Edycja kursu
+        async function editCourse(id) {
+            try {
+                const response = await fetch(`/api/courses/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas pobierania danych kursu');
+
+                const course = await response.json();
+                document.getElementById('editCourseId').value = course.id;
+                document.getElementById('editName').value = course.name;
+                document.getElementById('editDescription').value = course.description;
+
+                const modal = new bootstrap.Modal(document.getElementById('editCourseModal'));
+                modal.show();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Aktualizacja kursu
+        async function updateCourse() {
+            const id = document.getElementById('editCourseId').value;
+            const course = {
+                id: parseInt(id),
+                name: document.getElementById('editName').value,
+                description: document.getElementById('editDescription').value
+            };
+
+            try {
+                const response = await fetch(`/api/courses/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(course)
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas aktualizacji kursu');
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editCourseModal'));
+                modal.hide();
+                loadCourses();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Usuwanie kursu
+        async function deleteCourse(id) {
+            if (!confirm('Czy na pewno chcesz usunąć ten kurs?')) return;
+
+            try {
+                const response = await fetch(`/api/courses/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas usuwania kursu');
+
+                loadCourses();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Inicjalizacja
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!getToken()) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loadCourses();
+        });
+    </script>
+</body>
+</html> 

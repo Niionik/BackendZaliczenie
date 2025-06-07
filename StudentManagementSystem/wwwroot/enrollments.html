@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Zarządzanie Zapisami</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/index.html">System Zarządzania</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/students.html">Studenci</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/courses.html">Kursy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/enrollments.html">Zapisy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Zarządzanie Zapisami</h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEnrollmentModal">
+                    Dodaj Zapis
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Student</th>
+                                <th>Kurs</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enrollmentsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal dodawania zapisu -->
+    <div class="modal fade" id="addEnrollmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Dodaj Zapis</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addEnrollmentForm">
+                        <div class="mb-3">
+                            <label for="studentId" class="form-label">Student</label>
+                            <select class="form-select" id="studentId" required>
+                                <option value="">Wybierz studenta...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="courseId" class="form-label">Kurs</label>
+                            <select class="form-select" id="courseId" required>
+                                <option value="">Wybierz kurs...</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEnrollment()">Zapisz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal edycji zapisu -->
+    <div class="modal fade" id="editEnrollmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edytuj Zapis</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editEnrollmentForm">
+                        <input type="hidden" id="editEnrollmentId">
+                        <div class="mb-3">
+                            <label for="editStudentId" class="form-label">Student</label>
+                            <select class="form-select" id="editStudentId" required>
+                                <option value="">Wybierz studenta...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCourseId" class="form-label">Kurs</label>
+                            <select class="form-select" id="editCourseId" required>
+                                <option value="">Wybierz kurs...</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary" onclick="updateEnrollment()">Zapisz zmiany</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Funkcje pomocnicze
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        function showError(message) {
+            alert('Błąd: ' + message);
+        }
+
+        // Ładowanie list studentów i kursów
+        async function loadStudentsAndCourses() {
+            try {
+                const [studentsResponse, coursesResponse] = await Promise.all([
+                    fetch('/api/students', {
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    }),
+                    fetch('/api/courses', {
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    })
+                ]);
+
+                if (!studentsResponse.ok) throw new Error('Błąd podczas pobierania studentów');
+                if (!coursesResponse.ok) throw new Error('Błąd podczas pobierania kursów');
+
+                const students = await studentsResponse.json();
+                const courses = await coursesResponse.json();
+
+                // Aktualizacja selectów
+                const studentSelects = [document.getElementById('studentId'), document.getElementById('editStudentId')];
+                const courseSelects = [document.getElementById('courseId'), document.getElementById('editCourseId')];
+
+                studentSelects.forEach(select => {
+                    if (select) {
+                        select.innerHTML = '<option value="">Wybierz studenta...</option>' +
+                            students.map(s => `<option value="${s.id}">${s.firstName} ${s.lastName}</option>`).join('');
+                    }
+                });
+
+                courseSelects.forEach(select => {
+                    if (select) {
+                        select.innerHTML = '<option value="">Wybierz kurs...</option>' +
+                            courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                    }
+                });
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Ładowanie zapisów
+        async function loadEnrollments() {
+            try {
+                const response = await fetch('/api/enrollments', {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Błąd podczas pobierania zapisów');
+                
+                const enrollments = await response.json();
+                const tbody = document.getElementById('enrollmentsTableBody');
+                tbody.innerHTML = '';
+                
+                enrollments.forEach(enrollment => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${enrollment.id}</td>
+                            <td>${enrollment.student.firstName} ${enrollment.student.lastName}</td>
+                            <td>${enrollment.course.name}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="editEnrollment(${enrollment.id})">Edytuj</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteEnrollment(${enrollment.id})">Usuń</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Dodawanie zapisu
+        async function saveEnrollment() {
+            const enrollment = {
+                studentId: parseInt(document.getElementById('studentId').value),
+                courseId: parseInt(document.getElementById('courseId').value)
+            };
+
+            try {
+                const response = await fetch('/api/enrollments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(enrollment)
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas dodawania zapisu');
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addEnrollmentModal'));
+                modal.hide();
+                document.getElementById('addEnrollmentForm').reset();
+                loadEnrollments();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Edycja zapisu
+        async function editEnrollment(id) {
+            try {
+                const response = await fetch(`/api/enrollments/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas pobierania danych zapisu');
+
+                const enrollment = await response.json();
+                document.getElementById('editEnrollmentId').value = enrollment.id;
+                document.getElementById('editStudentId').value = enrollment.studentId;
+                document.getElementById('editCourseId').value = enrollment.courseId;
+
+                const modal = new bootstrap.Modal(document.getElementById('editEnrollmentModal'));
+                modal.show();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Aktualizacja zapisu
+        async function updateEnrollment() {
+            const id = document.getElementById('editEnrollmentId').value;
+            const enrollment = {
+                id: parseInt(id),
+                studentId: parseInt(document.getElementById('editStudentId').value),
+                courseId: parseInt(document.getElementById('editCourseId').value)
+            };
+
+            try {
+                const response = await fetch(`/api/enrollments/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(enrollment)
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas aktualizacji zapisu');
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editEnrollmentModal'));
+                modal.hide();
+                loadEnrollments();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Usuwanie zapisu
+        async function deleteEnrollment(id) {
+            if (!confirm('Czy na pewno chcesz usunąć ten zapis?')) return;
+
+            try {
+                const response = await fetch(`/api/enrollments/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas usuwania zapisu');
+
+                loadEnrollments();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Inicjalizacja
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!getToken()) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loadStudentsAndCourses();
+            loadEnrollments();
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Zarządzanie Studentami</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/index.html">System Zarządzania</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/students.html">Studenci</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/courses.html">Kursy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/enrollments.html">Zapisy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Zarządzanie Studentami</h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                    Dodaj Studenta
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Imię</th>
+                                <th>Nazwisko</th>
+                                <th>Email</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal dodawania studenta -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Dodaj Studenta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addStudentForm">
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">Imię</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Nazwisko</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStudent()">Zapisz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal edycji studenta -->
+    <div class="modal fade" id="editStudentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edytuj Studenta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editStudentForm">
+                        <input type="hidden" id="editStudentId">
+                        <div class="mb-3">
+                            <label for="editFirstName" class="form-label">Imię</label>
+                            <input type="text" class="form-control" id="editFirstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLastName" class="form-label">Nazwisko</label>
+                            <input type="text" class="form-control" id="editLastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary" onclick="updateStudent()">Zapisz zmiany</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Funkcje pomocnicze
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        function showError(message) {
+            alert('Błąd: ' + message);
+        }
+
+        // Ładowanie studentów
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/students', {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Błąd podczas pobierania studentów');
+                
+                const students = await response.json();
+                const tbody = document.getElementById('studentsTableBody');
+                tbody.innerHTML = '';
+                
+                students.forEach(student => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${student.id}</td>
+                            <td>${student.firstName}</td>
+                            <td>${student.lastName}</td>
+                            <td>${student.email}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="editStudent(${student.id})">Edytuj</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteStudent(${student.id})">Usuń</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Dodawanie studenta
+        async function saveStudent() {
+            const student = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value
+            };
+
+            try {
+                const response = await fetch('/api/students', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(student)
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas dodawania studenta');
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addStudentModal'));
+                modal.hide();
+                document.getElementById('addStudentForm').reset();
+                loadStudents();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Edycja studenta
+        async function editStudent(id) {
+            try {
+                const response = await fetch(`/api/students/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas pobierania danych studenta');
+
+                const student = await response.json();
+                document.getElementById('editStudentId').value = student.id;
+                document.getElementById('editFirstName').value = student.firstName;
+                document.getElementById('editLastName').value = student.lastName;
+                document.getElementById('editEmail').value = student.email;
+
+                const modal = new bootstrap.Modal(document.getElementById('editStudentModal'));
+                modal.show();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Aktualizacja studenta
+        async function updateStudent() {
+            const id = document.getElementById('editStudentId').value;
+            const student = {
+                id: parseInt(id),
+                firstName: document.getElementById('editFirstName').value,
+                lastName: document.getElementById('editLastName').value,
+                email: document.getElementById('editEmail').value
+            };
+
+            try {
+                const response = await fetch(`/api/students/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(student)
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas aktualizacji studenta');
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editStudentModal'));
+                modal.hide();
+                loadStudents();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Usuwanie studenta
+        async function deleteStudent(id) {
+            if (!confirm('Czy na pewno chcesz usunąć tego studenta?')) return;
+
+            try {
+                const response = await fetch(`/api/students/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Błąd podczas usuwania studenta');
+
+                loadStudents();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Inicjalizacja
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!getToken()) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loadStudents();
+        });
+    </script>
+</body>
+</html> 

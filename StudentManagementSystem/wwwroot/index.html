@@ -2,58 +2,100 @@
 <html lang="pl">
 <head>
     <meta charset="utf-8">
-    <title>Student Management System API</title>
+    <title>System Zarządzania Studentami</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <div class="auth-status">
-            <div id="notLoggedIn" style="display: none;">
-                <p>Nie jesteś zalogowany</p>
-                <a href="/login.html" class="login-btn">🔑 Zaloguj się</a>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/index.html">System Zarządzania</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/students.html">Studenci</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/courses.html">Kursy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/enrollments.html">Zapisy</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div id="loggedIn" style="display: none;">
-                <p>Zalogowany jako: <span id="userRole">-</span></p>
-                <button onclick="logout()" class="logout-btn">🚪 Wyloguj się</button>
+        </nav>
+
+        <div class="row">
+            <div class="col">
+                <div class="text-center">
+                    <h1 class="display-4 mb-4">System Zarządzania Studentami</h1>
+                    <p class="lead mb-5">Witaj w systemie zarządzania studentami, kursami i zapisami.</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Zarządzanie Studentami</h5>
+                                <p class="card-text">Dodawaj, edytuj i usuwaj studentów w systemie.</p>
+                                <a href="/students.html" class="btn btn-primary">Przejdź do studentów</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Zarządzanie Kursami</h5>
+                                <p class="card-text">Dodawaj, edytuj i usuwaj kursy w systemie.</p>
+                                <a href="/courses.html" class="btn btn-primary">Przejdź do kursów</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Zarządzanie Zapisami</h5>
+                                <p class="card-text">Zarządzaj zapisami studentów na kursy.</p>
+                                <a href="/enrollments.html" class="btn btn-primary">Przejdź do zapisów</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Dodatkowe funkcje</h5>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <a href="/swagger" target="_blank" class="btn btn-outline-primary w-100">Swagger UI</a>
+                                    </li>
+                                    <li class="mb-2">
+                                        <a href="/graphql" target="_blank" class="btn btn-outline-primary w-100">GraphQL Playground</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <h1>Student Management System API</h1>
-        <ul>
-            <li><a target="_blank" href="/swagger">📄 Dokumentacja Swagger (REST API)</a></li>
-            <li><a target="_blank" href="/graphql">🧬 GraphQL Playground</a></li>
-            <li><a target="_blank" href="/api/students">👨‍🎓 Lista studentów (GET)</a></li>
-            <li><a target="_blank" href="/api/courses">📚 Lista kursów (GET)</a></li>
-            <li><a target="_blank" href="/api/enrollments">📝 Lista zapisów (GET)</a></li>
-        </ul>
-        <p class="footer">Projekt zaliczeniowy .NET – Clean Architecture - Opałacz Patrycja 14968</p>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function checkAuthStatus() {
-            const token = localStorage.getItem('token');
-            const notLoggedIn = document.getElementById('notLoggedIn');
-            const loggedIn = document.getElementById('loggedIn');
-            const userRole = document.getElementById('userRole');
-
-            if (token) {
-                notLoggedIn.style.display = 'none';
-                loggedIn.style.display = 'block';
-                userRole.textContent = token === 'admin-token' ? 'Administrator' : 'Użytkownik';
-            } else {
-                notLoggedIn.style.display = 'block';
-                loggedIn.style.display = 'none';
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('token')) {
+                window.location.href = '/login.html';
             }
-        }
-
-        function logout() {
-            localStorage.removeItem('token');
-            checkAuthStatus();
-        }
-
-        // Sprawdź status logowania przy załadowaniu strony
-        document.addEventListener('DOMContentLoaded', checkAuthStatus);
+        });
     </script>
 </body>
 </html> 
