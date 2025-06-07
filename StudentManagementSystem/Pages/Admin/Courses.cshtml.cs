@@ -17,10 +17,16 @@ public class AdminCoursesModel : PageModel
         _courseRepository = courseRepository;
     }
 
-    public required IEnumerable<CourseDto> Courses { get; set; }
+    public IEnumerable<CourseDto> Courses { get; set; } = new List<CourseDto>();
 
-    public async Task OnGetAsync()
+    public void OnGet()
     {
-        Courses = await _courseRepository.GetAllAsync();
+        Courses = _courseRepository.GetAllAsync().Result.Select(c => new CourseDto
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Description = c.Description,
+            Enrollments = new List<EnrollmentDto>()
+        });
     }
 } 

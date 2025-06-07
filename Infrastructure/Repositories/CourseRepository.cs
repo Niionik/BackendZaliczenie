@@ -24,18 +24,22 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Course?> GetByIdAsync(int id)
+        public async Task<Course> GetByIdAsync(int id)
         {
-            return await _context.Courses
+            var course = await _context.Courses
                 .Include(c => c.Enrollments)
                 .FirstOrDefaultAsync(c => c.Id == id);
+            
+            if (course == null)
+                throw new KeyNotFoundException($"Course with ID {id} not found");
+                
+            return course;
         }
 
-        public async Task<Course> AddAsync(Course course)
+        public async Task AddAsync(Course course)
         {
             await _context.Courses.AddAsync(course);
             await _context.SaveChangesAsync();
-            return course;
         }
 
         public async Task UpdateAsync(Course course)

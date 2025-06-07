@@ -17,10 +17,17 @@ public class AdminStudentsModel : PageModel
         _studentRepository = studentRepository;
     }
 
-    public required IEnumerable<StudentDto> Students { get; set; }
+    public IEnumerable<StudentDto> Students { get; set; } = new List<StudentDto>();
 
-    public async Task OnGetAsync()
+    public void OnGet()
     {
-        Students = await _studentRepository.GetAllAsync();
+        Students = _studentRepository.GetAllAsync().Result.Select(s => new StudentDto
+        {
+            Id = s.Id,
+            FirstName = s.FirstName,
+            LastName = s.LastName,
+            Email = s.Email,
+            Enrollments = new List<EnrollmentDto>()
+        });
     }
 } 
