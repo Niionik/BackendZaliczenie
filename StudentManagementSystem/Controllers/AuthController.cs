@@ -20,7 +20,6 @@ namespace Presentation.RestApi.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            // Prosta walidacja (w realnym projekcie: sprawdzanie w bazie, hashowanie itd.)
             if ((request.Username == "admin" && request.Password == "admin") ||
                 (request.Username == "user" && request.Password == "user"))
             {

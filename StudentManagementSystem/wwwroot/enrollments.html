@@ -127,7 +127,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Funkcje pomocnicze
         function getToken() {
             return localStorage.getItem('token');
         }
@@ -136,7 +135,6 @@
             alert('Błąd: ' + message);
         }
 
-        // Ładowanie list studentów i kursów
         async function loadStudentsAndCourses() {
             try {
                 const [studentsResponse, coursesResponse] = await Promise.all([
@@ -154,7 +152,6 @@
                 const students = await studentsResponse.json();
                 const courses = await coursesResponse.json();
 
-                // Aktualizacja selectów
                 const studentSelects = [document.getElementById('studentId'), document.getElementById('editStudentId')];
                 const courseSelects = [document.getElementById('courseId'), document.getElementById('editCourseId')];
 
@@ -176,7 +173,6 @@
             }
         }
 
-        // Ładowanie zapisów
         async function loadEnrollments() {
             try {
                 const response = await fetch('/api/enrollments', {
@@ -209,7 +205,6 @@
             }
         }
 
-        // Dodawanie zapisu
         async function saveEnrollment() {
             const enrollment = {
                 studentId: parseInt(document.getElementById('studentId').value),
@@ -237,7 +232,6 @@
             }
         }
 
-        // Edycja zapisu
         async function editEnrollment(id) {
             try {
                 const response = await fetch(`/api/enrollments/${id}`, {
@@ -260,7 +254,6 @@
             }
         }
 
-        // Aktualizacja zapisu
         async function updateEnrollment() {
             const id = document.getElementById('editEnrollmentId').value;
             const enrollment = {
@@ -289,7 +282,6 @@
             }
         }
 
-        // Usuwanie zapisu
         async function deleteEnrollment(id) {
             if (!confirm('Czy na pewno chcesz usunąć ten zapis?')) return;
 
@@ -309,7 +301,6 @@
             }
         }
 
-        // Inicjalizacja
         document.addEventListener('DOMContentLoaded', () => {
             if (!getToken()) {
                 window.location.href = '/login.html';

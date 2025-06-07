@@ -9,11 +9,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Dodajemy obsługę stron Razor
+
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 
-// Dodajemy konfigurację API
 builder.Configuration["ApiBaseUrl"] = "http://localhost:5000";
 
 builder.Services.AddControllers();
@@ -58,7 +57,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Wyłączamy przekierowanie HTTPS w środowisku deweloperskim
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
@@ -67,21 +65,18 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseRouting();
 
-// Konfiguracja routingu
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 
-// Przekierowanie z głównego adresu na index.html
 app.MapGet("/", async context =>
 {
     context.Response.Redirect("/index.html", permanent: true);
     await Task.CompletedTask;
 });
 
-// Dodajemy przekierowanie z /login na /login.html
 app.MapGet("/login", context =>
 {
     context.Response.Redirect("/login.html");
