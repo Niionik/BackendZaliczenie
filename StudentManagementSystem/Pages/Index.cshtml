@@ -1,0 +1,21 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Strona główna";
+}
+
+<div class="text-center">
+    <h1 class="display-4">System Zarządzania Studentami</h1>
+    <p class="lead">Witaj w systemie zarządzania studentami, kursami i zapisami.</p>
+    
+    <div class="mt-5">
+        <h2>Dostępne funkcje:</h2>
+        <ul class="list-unstyled">
+            <li><a href="/api/students">Lista studentów (API)</a></li>
+            <li><a href="/api/courses">Lista kursów (API)</a></li>
+            <li><a href="/api/enrollments">Lista zapisów (API)</a></li>
+            <li><a href="/graphql">GraphQL Playground</a></li>
+            <li><a href="/swagger">Swagger UI</a></li>
+        </ul>
+    </div>
+</div> 
