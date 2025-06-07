@@ -1,5 +1,6 @@
 using Application.Repositories;
 using Domain;
+using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,16 +17,21 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Student> GetByIdAsync(int id)
-            => await _context.Students.Include(s => s.Enrollments).FirstOrDefaultAsync(s => s.Id == id);
-
         public async Task<IEnumerable<Student>> GetAllAsync()
-            => await _context.Students.Include(s => s.Enrollments).ToListAsync();
-
-        public async Task AddAsync(Student student)
         {
-            _context.Students.Add(student);
+            return await _context.Students.Include(s => s.Enrollments).ToListAsync();
+        }
+
+        public async Task<Student?> GetByIdAsync(int id)
+        {
+            return await _context.Students.Include(s => s.Enrollments).FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        public async Task<Student> AddAsync(Student student)
+        {
+            await _context.Students.AddAsync(student);
             await _context.SaveChangesAsync();
+            return student;
         }
 
         public async Task UpdateAsync(Student student)
@@ -36,7 +42,7 @@ namespace Infrastructure.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var student = await _context.Students.FindAsync(id);
+            var student = await GetByIdAsync(id);
             if (student != null)
             {
                 _context.Students.Remove(student);

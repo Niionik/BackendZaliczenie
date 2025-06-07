@@ -14,7 +14,6 @@ namespace Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // Konfiguracje relacji, jeśli potrzeba
         }
     }
 } 

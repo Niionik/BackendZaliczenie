@@ -1,5 +1,6 @@
 using Application.Repositories;
 using Domain;
+using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,16 +17,21 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Course> GetByIdAsync(int id)
-            => await _context.Courses.Include(c => c.Enrollments).FirstOrDefaultAsync(c => c.Id == id);
-
         public async Task<IEnumerable<Course>> GetAllAsync()
-            => await _context.Courses.Include(c => c.Enrollments).ToListAsync();
-
-        public async Task AddAsync(Course course)
         {
-            _context.Courses.Add(course);
+            return await _context.Courses.Include(c => c.Enrollments).ToListAsync();
+        }
+
+        public async Task<Course?> GetByIdAsync(int id)
+        {
+            return await _context.Courses.Include(c => c.Enrollments).FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<Course> AddAsync(Course course)
+        {
+            await _context.Courses.AddAsync(course);
             await _context.SaveChangesAsync();
+            return course;
         }
 
         public async Task UpdateAsync(Course course)
@@ -36,7 +42,7 @@ namespace Infrastructure.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var course = await _context.Courses.FindAsync(id);
+            var course = await GetByIdAsync(id);
             if (course != null)
             {
                 _context.Courses.Remove(course);

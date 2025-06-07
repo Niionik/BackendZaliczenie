@@ -7,9 +7,9 @@ namespace Application.Repositories
 {
     public interface IEnrollmentRepository
     {
-        Task<Enrollment> GetByIdAsync(int id);
         Task<IEnumerable<Enrollment>> GetAllAsync();
-        Task AddAsync(Enrollment enrollment);
+        Task<Enrollment?> GetByIdAsync(int id);
+        Task<Enrollment> AddAsync(Enrollment enrollment);
         Task UpdateAsync(Enrollment enrollment);
         Task DeleteAsync(int id);
     }

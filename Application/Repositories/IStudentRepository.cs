@@ -6,9 +6,9 @@ namespace Application.Repositories
 {
     public interface IStudentRepository
     {
-        Task<Student> GetByIdAsync(int id);
         Task<IEnumerable<Student>> GetAllAsync();
-        Task AddAsync(Student student);
+        Task<Student?> GetByIdAsync(int id);
+        Task<Student> AddAsync(Student student);
         Task UpdateAsync(Student student);
         Task DeleteAsync(int id);
     }

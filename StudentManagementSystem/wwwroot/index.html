@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Student Management System API</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-status">
+            <div id="notLoggedIn" style="display: none;">
+                <p>Nie jesteś zalogowany</p>
+                <a href="/login.html" class="login-btn">🔑 Zaloguj się</a>
+            </div>
+            <div id="loggedIn" style="display: none;">
+                <p>Zalogowany jako: <span id="userRole">-</span></p>
+                <button onclick="logout()" class="logout-btn">🚪 Wyloguj się</button>
+            </div>
+        </div>
+
+        <h1>Student Management System API</h1>
+        <ul>
+            <li><a target="_blank" href="/swagger">📄 Dokumentacja Swagger (REST API)</a></li>
+            <li><a target="_blank" href="/graphql">🧬 GraphQL Playground</a></li>
+            <li><a target="_blank" href="/api/students">👨‍🎓 Lista studentów (GET)</a></li>
+            <li><a target="_blank" href="/api/courses">📚 Lista kursów (GET)</a></li>
+            <li><a target="_blank" href="/api/enrollments">📝 Lista zapisów (GET)</a></li>
+        </ul>
+        <p class="footer">Projekt zaliczeniowy .NET – Clean Architecture - Opałacz Patrycja 14968</p>
+    </div>
+
+    <script>
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const notLoggedIn = document.getElementById('notLoggedIn');
+            const loggedIn = document.getElementById('loggedIn');
+            const userRole = document.getElementById('userRole');
+
+            if (token) {
+                notLoggedIn.style.display = 'none';
+                loggedIn.style.display = 'block';
+                userRole.textContent = token === 'admin-token' ? 'Administrator' : 'Użytkownik';
+            } else {
+                notLoggedIn.style.display = 'block';
+                loggedIn.style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            checkAuthStatus();
+        }
+
+        // Sprawdź status logowania przy załadowaniu strony
+        document.addEventListener('DOMContentLoaded', checkAuthStatus);
+    </script>
+</body>
+</html> 

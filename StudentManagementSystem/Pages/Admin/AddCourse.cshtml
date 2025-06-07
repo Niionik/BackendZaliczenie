@@ -1,0 +1,28 @@
+@page
+@model StudentManagementSystem.Pages.Admin.AddCourseModel
+@{
+    ViewData["Title"] = "Dodaj kurs";
+}
+
+<div class="container">
+    <h2>Dodaj nowy kurs</h2>
+    <form method="post">
+        <div class="form-group">
+            <label asp-for="Name">Nazwa kursu</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Description">Opis</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Dodaj kurs</button>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<a asp-page="/Admin/Courses">Powrót do listy</a> 

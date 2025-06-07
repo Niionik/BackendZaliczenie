@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Logowanie - Student Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>Logowanie</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Nazwa użytkownika" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Hasło" required>
+                </div>
+                <button type="submit">Zaloguj się</button>
+                <div id="loginMessage"></div>
+            </form>
+            <div class="login-info">
+                <p>Dostępne konta:</p>
+                <ul>
+                    <li>Administrator: admin / admin</li>
+                    <li>Użytkownik: user / user</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('loginMessage');
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.token);
+                    messageDiv.textContent = 'Zalogowano pomyślnie!';
+                    messageDiv.style.color = 'green';
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                } else {
+                    messageDiv.textContent = 'Błąd logowania. Sprawdź dane.';
+                    messageDiv.style.color = 'red';
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Wystąpił błąd podczas logowania.';
+                messageDiv.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html> 

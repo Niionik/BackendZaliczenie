@@ -1,5 +1,6 @@
 using Application.Repositories;
 using Domain;
+using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,22 +17,27 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Enrollment> GetByIdAsync(int id)
-            => await _context.Enrollments
-                .Include(e => e.Student)
-                .Include(e => e.Course)
-                .FirstOrDefaultAsync(e => e.Id == id);
-
         public async Task<IEnumerable<Enrollment>> GetAllAsync()
-            => await _context.Enrollments
+        {
+            return await _context.Enrollments
                 .Include(e => e.Student)
                 .Include(e => e.Course)
                 .ToListAsync();
+        }
 
-        public async Task AddAsync(Enrollment enrollment)
+        public async Task<Enrollment?> GetByIdAsync(int id)
         {
-            _context.Enrollments.Add(enrollment);
+            return await _context.Enrollments
+                .Include(e => e.Student)
+                .Include(e => e.Course)
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
+
+        public async Task<Enrollment> AddAsync(Enrollment enrollment)
+        {
+            await _context.Enrollments.AddAsync(enrollment);
             await _context.SaveChangesAsync();
+            return enrollment;
         }
 
         public async Task UpdateAsync(Enrollment enrollment)
@@ -42,7 +48,7 @@ namespace Infrastructure.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var enrollment = await _context.Enrollments.FindAsync(id);
+            var enrollment = await GetByIdAsync(id);
             if (enrollment != null)
             {
                 _context.Enrollments.Remove(enrollment);
